@@ -1,0 +1,61 @@
+﻿
+@{
+    ViewData["Title"] = "First";
+}
+
+<h1>First</h1>
+<button id="button1" class="btn btn-primary mb-3">Ajax</button>
+<button id="button2" class="btn btn-primary mb-3">停止Ajax</button>
+<img src="~/images/Ghost.gif" id= "img1" style="display:none"/>
+<div id="div1" class="alert alert-info"></div>
+
+@section Scripts{
+    <script>
+        const btn = document.querySelector("#button1");
+        const btnStop = document.querySelector("#button2");
+        const theDiv = document.querySelector("#div1");
+        const imgLoad = document.querySelector("#img1");
+        let abortController;
+        btnStop.addEventListener("click", () => {
+            if (abortController) abortController.abort();
+        });
+
+        btn.addEventListener("click",async () => {
+            try {
+                btn.setAttribute("disabled", "disabled");
+                imgLoad.style.display = "inline";
+
+                abortController = new AbortController();
+                let signal = abortController.signal;
+                
+                setTimeout(() => {
+                    abortController.abort();
+                }, 3000);
+
+                const response = await fetch('@Url.Content("~/api/index")', {signal})
+                if (!response.ok) throw new Error(response.status);
+                const data = await response.text();
+                theDiv.innerHTML = `<h2>${data}</h2>`;
+            }
+            catch (error)
+            {
+                theDiv.innerHTML = `<h2>${error}</h2>`;
+            }
+            finally {
+                btn.removeAttribute("disabled");
+                imgLoad.style.display = "none";
+            }
+            //fetch('/api/index')不好寫法
+            // fetch('@Url.Content("~/api/index")')
+            //     .then((response) => {
+            //         return response.text();
+            //     })
+            //     .then((data) => { 
+            //         theDiv.innerHTML = `<h2>${data}</h2>`;
+            //     });
+
+            // theDiv.innerHTML = "你好";
+         });
+    </script>
+}
+

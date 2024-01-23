@@ -1,0 +1,78 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+@* <form class="form"> *@
+    <div class="mb-3">
+        <label for="name" class="form-label " >姓名:</label>    
+        <input type="text" id="name" class="form-control"/>  
+        
+    </div>
+    <div id="div1" class="alert alert-danger p-2 " style="display:none">1</div>
+    <div class="mt=2 mb-3">        
+        <label for="email" class="form-label">Email:</label>
+        <input type="email" id="email" class="form-control" />
+    </div>           
+    <div class="mb-3">
+        <label for="age" class="form-label">年齡:</label>
+        <input type="number" id="age" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" id ="btn1">送出</button>
+    </div>
+    <div id="div2" class="alert alert-info p-2 " style="display:none">1</div>
+
+@section Scripts{
+  <script>
+
+        const btn1 = document.querySelector("#btn1");
+        const inputName = document.querySelector("#name");
+        const inputEmail = document.querySelector("#email");
+        const inputAge = document.querySelector("#age");
+        const divAlert = document.querySelector("#div1");
+        const divAlert2 = document.querySelector("#div2");
+
+        inputName.addEventListener("blur", async () => {
+            try {
+                let nameText = inputName.value;
+                const url = `@Url.Content("~/api/checkAccount")?account=${nameText} `;
+                const response = await fetch(url)
+                if (!response.ok) throw new Error(response.status);
+                const IsExtis = await response.json();
+                if (IsExtis) {
+                    divAlert.style.display = "block";
+                    divAlert.innerHTML = "帳號已存在";
+                }
+                else { 
+                    divAlert.style.display = "none";
+                }
+            }
+            catch(error) {
+                divAlert.style.display = "block";
+                divAlert.innerHTML = error;
+            }
+        })
+      btn1.addEventListener("click",async () => {            
+            try {
+                let nameText = inputName.value;
+                let emailText = inputEmail.value;
+                let ageText = inputAge.value;
+                const url = `@Url.Content("~/api/FormReturnData")?name=${nameText}&email=${emailText}&age=${ageText} `;
+                const response = await fetch(url)
+                if (!response.ok) throw new Error(response.status);
+                const data = await response.json();
+                const {name ,email,age } = data
+                divAlert2.style.display = "block";
+                divAlert2.innerHTML = `Hello ${name}, ${age}歲了，電子信箱是 ${email}`;
+            }
+            catch (error) {
+                divAlert.style.display = "block";
+                divAlert.innerHTML = error;
+            }
+      });
+
+    </script>
+}
